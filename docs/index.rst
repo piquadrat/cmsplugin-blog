@@ -133,7 +133,7 @@ Next, you need to update the database with the fields required by cmsplugin-blog
 *********
 Templates
 *********
-In your ``template`` folder create a template adapted to your site as ``cmsplugin_blog/cmsplugin_blog_base.html``.
+In your ``templates`` folder for your Django project create an overriding template adapted to your site as ``cmsplugin_blog/cmsplugin_blog_base.html``.
 
 For example, if you have a template called ``base.html`` which has a block called ``body`` create a template that looks like this::
 
@@ -144,7 +144,13 @@ For example, if you have a template called ``base.html`` which has a block calle
         {% block right-col %}{% endblock %}
     {% endblock %}
 
-.. note:: The cmsplugin-blog uses the block names ``left-col`` and ``right-col`` by default. You can also find an example template with comments under docs/ in the source.
+.. note:: The cmsplugin-blog uses the block names ``left-col`` and ``right-col`` by default.
+
+********
+Comments
+********
+
+To allow comments on entries you can use a Django based comment system (django.contrib.comments or django-threadedcomments) or you can embed an external comment system such as Disqus. There is an example entry_detail.html template with threaded comments in the source.
 
 ********
 Sitemaps
