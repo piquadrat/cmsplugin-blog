@@ -100,9 +100,10 @@ class BaseEntryAdmin(M2MPlaceholderAdmin):
     prepopulated_fields = not settings.DEBUG and {'slug': ('title',)} or {}
     
     search_fields = ('entrytitle__title', 'tags')
-    list_display = ('title', 'languages', 'author', 'is_published', 'pub_date')
-    list_editable = ('is_published',)
-    list_filter = ('is_published', 'pub_date')
+    list_display = ('title', 'languages', 'author', 'is_published', 'comments_enabled', 'pub_date')
+    list_editable = ('is_published', 'comments_enabled')
+    list_filter = ('is_published', 'comments_enabled','pub_date')
+
     date_hierarchy = 'pub_date'
 
     def author(self, obj):
@@ -121,6 +122,7 @@ class BaseEntryAdmin(M2MPlaceholderAdmin):
         fieldsets[0] = (None, {'fields': (
             'language',
             'is_published',
+            'comments_enabled',
             'pub_date',
             'author',
             'title',

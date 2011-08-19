@@ -144,7 +144,7 @@ For example, if you have a template called ``base.html`` which has a block calle
         {% block right-col %}{% endblock %}
     {% endblock %}
 
-.. note:: The cmsplugin-blog uses the block names ``left-col`` and ``right-col`` by default.
+.. note:: The cmsplugin-blog uses the block names ``left-col`` and ``right-col`` by default. You can also find an example template with comments under docs/ in the source.
 
 ********
 Sitemaps
