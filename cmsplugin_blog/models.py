@@ -120,17 +120,23 @@ class EntryTitle(models.Model):
         return self.entry.pub_date
     pub_date = property(_pub_date)
     
+    def close_days(self):
+        pub_date = datetime.date(self.pub_date.year, self.pub_date.month, self.pub_date.day)
+        return (pub_date - datetime.date.today()).days
+        
     def comments_closed(self):
         if not self.comments_enabled:
             return True
-        pub_date = datetime.date(self.pub_date.year, self.pub_date.month, self.pub_date.day)
-        if (pub_date - datetime.date.today()).days >= 7:
+        if self.pub_date < datetime.date.today() or self.close_days() >= 7:
             return True
         return False
     
-    def comments_under_moderation(self):
+    def moderate_days(self):
         pub_date = datetime.date(self.pub_date.year, self.pub_date.month, self.pub_date.day)
-        if (pub_date - datetime.date.today()).days >= 0:
+        return (pub_date - datetime.date.today()).days
+            
+    def comments_under_moderation(self):
+        if self.pub_date < datetime.date.today() or self.moderate_days() >= 1:
             return True
         return False
         
@@ -152,6 +158,6 @@ if 'django.contrib.comments' in settings.INSTALLED_APPS:
         auto_close_field = 'pub_date'
         close_after = 7
         auto_moderate_field = 'pub_date'
-        moderate_after = 0
+        moderate_after = 1
         
     moderator.register(EntryTitle, EntryModerator)
