@@ -97,10 +97,10 @@ class EntryTitle(models.Model):
     comments_enabled = models.BooleanField(_('enable comments'))
     close_comments_after = models.DateField(_('close comments after'),
         null=True, blank=True, default=close_comments_date,
-        help_text=_('Disallow/ delete comments after this date. Set empty to never close (Django 1.3).'))
+        help_text=_('Disallow/ delete comments after this date. Set empty to close immediately.'))
     moderate_comments_after = models.DateField(_('moderate comments after'),
         null=True, blank=True, default=datetime.date.today,
-        help_text=_('Moderate comments after this date. Set empty for no moderation (Django 1.3).'))
+        help_text=_('Moderate comments after this date. Set empty to moderate immediately.'))
     
     def __unicode__(self):
         return self.title
@@ -119,6 +119,24 @@ class EntryTitle(models.Model):
         unique_together = ('language', 'slug')
         verbose_name = _('blogentry')
         verbose_name_plural = _('blogentries')
+
+    def __close_comments_after(self):
+        if self.close_comments_after is None:
+            self.entry.pub_date
+        if datetime.date.today() < self.close_comments_after:
+            return datetime.date.today()
+        else:
+            return self.close_comments_after
+    _close_comments_after = property(__close_comments_after)     
+    
+    def __moderate_comments_after(self):
+        if self.moderate_comments_after is None:
+            return self.entry.pub_date
+        if datetime.date.today() < self.moderate_comments_after:
+            return datetime.date.today()
+        else:
+            return self.moderate_comments_after
+    _moderate_comments_after = property(__moderate_comments_after)     
 
     def comments_closed(self):
         if not self.comments_enabled:
@@ -147,9 +165,9 @@ if 'django.contrib.comments' in settings.INSTALLED_APPS:
     
     class EntryModerator(CommentModerator):
         enable_field = 'comments_enabled'
-        auto_close_field = 'close_comments_after'
+        auto_close_field = '_close_comments_after'
         close_after = 0
-        auto_moderate_field = 'moderate_comments_after'
+        auto_moderate_field = '_moderate_comments_after'
         moderale_after = 0
         
     moderator.register(EntryTitle, EntryModerator)
