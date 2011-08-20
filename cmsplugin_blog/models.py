@@ -97,10 +97,10 @@ class EntryTitle(models.Model):
     comments_enabled = models.BooleanField(_('enable comments'))
     close_comments_after = models.DateField(_('close comments after'),
         null=True, blank=True, default=close_comments_date,
-        help_text=_('Disallow/ delete comments after this date.'))
+        help_text=_('Disallow/ delete comments after this date. Set empty to never close.'))
     moderate_comments_after = models.DateField(_('moderate comments after'),
-        null=True, blank=True, default=datetime.datetime.now,
-        help_text=_('Moderate comments after this date.'))
+        null=True, blank=True, default=None,
+        help_text=_('Moderate comments after this date. Set empty for no moderation.'))
     
     def __unicode__(self):
         return self.title

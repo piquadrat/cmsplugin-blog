@@ -111,7 +111,7 @@ class BaseEntryAdmin(M2MPlaceholderAdmin):
     
     search_fields = ('entrytitle__title', 'tags')
     list_display = ('title', 'languages', 'author', 'is_published', 'pub_date')
-    list_editable = ('is_published' )
+    list_editable = ('is_published', )
     list_filter = ('is_published', 'pub_date')
 
     date_hierarchy = 'pub_date'
