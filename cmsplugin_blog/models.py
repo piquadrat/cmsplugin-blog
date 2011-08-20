@@ -17,8 +17,6 @@ from tagging.fields import TagField
 from simple_translation.actions import SimpleTranslationPlaceholderActions
 from djangocms_utils.fields import M2MPlaceholderField
 
-from django.contrib.comments.moderation import CommentModerator, moderator
-
 class PublishedEntriesQueryset(QuerySet):
     
     def published(self):
@@ -40,7 +38,6 @@ CMSPLUGIN_BLOG_PLACEHOLDERS = getattr(settings, 'CMSPLUGIN_BLOG_PLACEHOLDERS', (
               
 class Entry(models.Model):
     is_published = models.BooleanField(_('is published'))
-    comments_enabled = models.BooleanField(_('enable comments'))
     pub_date = models.DateTimeField(_('publish at'), default=datetime.datetime.now)
  
     placeholders = M2MPlaceholderField(actions=SimpleTranslationPlaceholderActions(), placeholders=CMSPLUGIN_BLOG_PLACEHOLDERS)
@@ -92,7 +89,8 @@ class EntryTitle(models.Model):
     title = models.CharField(_('title'), max_length=255)
     slug = models.SlugField(_('slug'), max_length=255)
     author = models.ForeignKey('auth.User', null=True, blank=True, verbose_name=_("author"))
-    
+    comments_enabled = models.BooleanField(_('enable comments'))
+
     def __unicode__(self):
         return self.title
         
@@ -120,8 +118,11 @@ class LatestEntriesPlugin(CMSPlugin):
                     
     current_language_only = models.BooleanField(_('Only show entries for the current language'))
 
-class EntryModerator(CommentModerator):
-    '''I don't think this actually works.'''
-    enable_field = 'comments_enabled'
+if 'django.contrib.comments' in settings.INSTALLED_APPS:
 
-moderator.register(Entry, EntryModerator)
+    from django.contrib.comments.moderation import CommentModerator, moderator
+    
+    class EntryModerator(CommentModerator):
+        enable_field = 'comments_enabled'
+    
+    moderator.register(EntryTitle, EntryModerator)

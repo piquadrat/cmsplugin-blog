@@ -8,17 +8,70 @@
   
   <p class="date"><span>{{ object.pub_date|date:"d F Y" }}</span> {{ object|render_language_choices:request|safe }}</p>
   
-  {% with object.placeholders|choose_placeholder:"one" as one %}
-      {% render_placeholder one %}
+  {% with object.placeholders|choose_placeholder:"excerpt" as excerpt %}
+      {% render_placeholder excerpt %}
   {% endwith %}
   
-  {% with object.placeholders|choose_placeholder:"two" as two %}
-      {% render_placeholder two %}
+  {% with object.placeholders|choose_placeholder:"content" as content %}
+      {% render_placeholder content %}
   {% endwith %}
   
   {% addtoblock "css" %}
-  <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}fivethreeo/dlform.css">
   <style type="text/css">
+    form.commentform {
+        border-bottom: solid 1px #dddddd;
+        background: url('formfade.png') bottom left repeat-x;
+    }
+    
+    form.commentform em { color: red; }
+    
+    form.commentform fieldset {
+        border: none;
+    }
+    
+    form.commentform legend {
+        font-weight:normal;
+    	font-family:Verdana;
+    }
+    
+    form.commentform input, form.commentform select, form.commentform textarea {
+        font-weight:normal;
+    	font-family:Verdana;
+    }
+    
+    form.commentform dl, dl.labels {
+    	margin:0em;
+    	font-size:100%;
+    	margin-top:0.5em
+    }
+    form.commentform dt, dl.labels dt {
+    	float:left;
+    	clear:left;
+    	width:10em;
+    	margin: 0 0 0.8em 0;
+    	color:#555;
+    	text-align:right;
+    	font-weight:normal;
+    	font-family:Verdana;
+    	border-top: solid 1px #dddddd;
+    	position:relative; /*IEWin hack*/
+    	padding-top: 0.2em;
+    }
+    form.commentform dd, dl.labels dd {
+    	clear:right;
+    	margin: 0 0 0.8em 10em;
+    	font-size:100%;
+    	font-style:normal;
+    	font-weight:normal;
+    	font-family:Verdana;
+    	border-top: solid 1px #dddddd;
+    	padding-top: 0.2em;
+    	padding-left: 0.5em;
+    }
+    form.commentform dt.submit, form.commentform dd.submit, dl.labels dd.submit	{
+    	margin: 2em 0 0.8em 0;
+    	border: none;
+    }  
      .attention { color: red;}
   </style>
   {% endaddtoblock %}
@@ -37,7 +90,7 @@
   
   <h2>{% trans "Comments" %}</h2>
   {% if not object.comments_enabled %}
-     <p class="attention">Comments are frozen. You cannot post new comments.</p>
+     <p class="attention">{% trans "Comments are frozen. You cannot post new comments." %}</p>
   {% endif %}  
  
   {% get_comment_list for title as comments_list %}
