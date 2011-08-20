@@ -83,14 +83,25 @@ class Entry(models.Model):
 
 tagging.register(Entry, tag_descriptor_attr='entry_tags')
 
+def close_comments_date():
+    """ Close comments after 7 days """
+    return datetime.date.today() + datetime.timedelta(days=7)
+
 class EntryTitle(models.Model):
     entry = models.ForeignKey(Entry, verbose_name=_('entry'))
     language = models.CharField(_('language'), max_length=15, choices=settings.LANGUAGES)
     title = models.CharField(_('title'), max_length=255)
     slug = models.SlugField(_('slug'), max_length=255)
     author = models.ForeignKey('auth.User', null=True, blank=True, verbose_name=_("author"))
+    
     comments_enabled = models.BooleanField(_('enable comments'))
-
+    close_comments_after = models.DateField(_('close comments after'),
+        null=True, blank=True, default=close_comments_date,
+        help_text=_('Disallow/ delete comments after this date.'))
+    moderate_comments_after = models.DateField(_('moderate comments after'),
+        null=True, blank=True, default=datetime.datetime.now,
+        help_text=_('Moderate comments after this date.'))
+    
     def __unicode__(self):
         return self.title
         
@@ -108,7 +119,19 @@ class EntryTitle(models.Model):
         unique_together = ('language', 'slug')
         verbose_name = _('blogentry')
         verbose_name_plural = _('blogentries')
+
+    def comments_closed(self):
+        if not self.comments_enabled:
+            return True
+        if self.close_comments_after and datetime.date.today() > self.close_comments_after:
+            return True
+        return False
     
+    def comments_under_moderation(self):
+        if self.moderate_comments_after and datetime.date.today() > self.moderate_comments_after:
+            return True
+        return False
+        
 class LatestEntriesPlugin(CMSPlugin):
     """
         Model for the settings when using the latest entries cms plugin
@@ -124,5 +147,9 @@ if 'django.contrib.comments' in settings.INSTALLED_APPS:
     
     class EntryModerator(CommentModerator):
         enable_field = 'comments_enabled'
-    
+        auto_close_field = 'close_comments_after'
+        close_after = 0
+        auto_moderate_field = 'moderate_comments_after'
+        moderale_after = 0
+        
     moderator.register(EntryTitle, EntryModerator)

@@ -89,8 +89,11 @@
   {% endaddtoblock %}
   
   <h2>{% trans "Comments" %}</h2>
-  {% if not object.comments_enabled %}
-     <p class="attention">{% trans "Comments are frozen. You cannot post new comments." %}</p>
+  {% if title.comments_closed %}
+     <p class="attention">{% trans "Comments are closed. You cannot post new comments." %}</p>
+  {% endif %}  
+  {% if title.comments_under_moderation %}
+     <p class="attention">{% trans "Comments are under moderation. Comment will be visible after approval." %}</p>
   {% endif %}  
  
   {% get_comment_list for title as comments_list %}
@@ -104,10 +107,13 @@
   <div {% if forloop.last %}id="clast"{% else %}id="c{{ comment.pk }}"{% endif %} class="comment {% if comment.depth != 1 %}indent {% endif %}{% cycle 'row1' 'row2' %}">
   
   <p class="comment-title">{{ comment.title }}</p>
-  {{ comment.comment|linebreaks }} <p><a href="#" onclick="display_comment_form('comment-form-{{ comment.pk }}'); return false">
-{% if object.comments_enabled %}
-   {% trans "Reply" %}</a></p>
+  {{ comment.comment|linebreaks }} 
   
+  {% if not title.comments_closed %}
+  <p><a href="#" onclick="display_comment_form('comment-form-{{ comment.pk }}'); return false">{% trans "Reply" %}}</a></p>
+  {% endif %}
+  
+{% if not title.comments_closed %}
   <div class="comment-form-threaded" id="comment-form-{{ comment.pk }}">
   {% get_comment_form for title as comment_form with comment.pk %}
   <form method="POST" action="{% comment_form_target %}" class="commentform">
@@ -138,8 +144,7 @@
   </dl>
   </fieldset>
   </form>
-{% else %}
-  </p>
+
 {% endif %}
   </div>
   
@@ -149,7 +154,7 @@
   
   {% endfor %}
  
-  {% if object.comments_enabled %} 
+  {% if not title.comments_closed %} 
   <h2>{% trans "Comment on this blogpost" %}</h2>
   
   {% get_comment_form for title as comment_form %}

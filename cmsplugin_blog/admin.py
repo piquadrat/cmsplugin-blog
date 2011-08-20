@@ -91,7 +91,42 @@ class M2MPlaceholderAdmin(PlaceholderTranslationAdmin):
             return HttpResponse(str("ok"))
         else:
             return HttpResponse(str("error"))        
-                
+            
+if 'django.contrib.comments' in settings.INSTALLED_APPS:
+    list_display = (
+        'title',
+        'languages',
+        'author',
+        'is_published',
+        'pub_date',
+        'comments_enabled',
+        'close_comments_after'
+        'moderate_comments_after'
+    )
+    fieldset_fields = (
+        'language',
+        'is_published',
+        'pub_date',
+        'author',
+        'title',
+        'slug',
+        'tags',
+        'comments_enabled',
+        'close_comments_after'
+        'moderate_comments_after'
+    )
+else:
+    list_display = ('title', 'languages', 'author', 'is_published', 'pub_date')
+    fieldset_fields = (
+            'language',
+            'is_published',
+            'pub_date',
+            'author',
+            'title',
+            'slug',
+            'tags'
+    )
+        
 class BaseEntryAdmin(M2MPlaceholderAdmin):
     
     form = EntryForm
@@ -100,9 +135,9 @@ class BaseEntryAdmin(M2MPlaceholderAdmin):
     prepopulated_fields = not settings.DEBUG and {'slug': ('title',)} or {}
     
     search_fields = ('entrytitle__title', 'tags')
-    list_display = ('title', 'languages', 'author', 'is_published', 'comments_enabled', 'pub_date')
-    list_editable = ('is_published', 'comments_enabled')
-    list_filter = ('is_published', 'comments_enabled','pub_date')
+    list_display = list_display
+    list_editable = ('is_published' )
+    list_filter = ('is_published', 'pub_date')
 
     date_hierarchy = 'pub_date'
 
@@ -119,16 +154,7 @@ class BaseEntryAdmin(M2MPlaceholderAdmin):
     # needed because of admin validation
     def get_fieldsets(self, request, obj=None):
         fieldsets = super(BaseEntryAdmin, self).get_fieldsets(request, obj=obj)
-        fieldsets[0] = (None, {'fields': (
-            'language',
-            'is_published',
-            'comments_enabled',
-            'pub_date',
-            'author',
-            'title',
-            'slug',
-            'tags'
-        )})
+        fieldsets[0] = (None, {'fields': fieldset_fields})
         return fieldsets
         
     def save_translated_form(self, request, obj, form, change):
