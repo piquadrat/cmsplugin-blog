@@ -1,7 +1,7 @@
 import datetime
 
 from django.core.urlresolvers import reverse
-from django.db import models
+from django.db import models, signals
 from django.db.models.query import QuerySet
 from django.conf import settings
 from django.utils.translation import get_language, ugettext_lazy as _
@@ -151,17 +151,23 @@ class LatestEntriesPlugin(CMSPlugin):
                     
     current_language_only = models.BooleanField(_('Only show entries for the current language'))
 
-if 'django.contrib.comments' in settings.INSTALLED_APPS:
+from django.contrib.comments.moderation import CommentModerator, moderator
 
-    from django.contrib.comments.moderation import CommentModerator, moderator
-    
-    class EntryModerator(CommentModerator):
-        enable_field = 'comments_enabled'
-        auto_close_field = 'pub_date'
-        close_after = 7
+class EntryModerator(CommentModerator):
+    enable_field = 'comments_enabled'
+    auto_close_field = 'pub_date'
+    close_after = 7
         
     def moderate(self, comment, content_object, request):
-        comment.is_public = False
         return True
-        
+    
+def is_public_false(self, instance, **kwargs):
+    instance.is_public = False
+    
+if 'django.contrib.comments' in settings.INSTALLED_APPS:
+
+    from django.contrib import comments
+
+    signals.pre_save.connect(comments.get_comment_model(), is_public_false) 
+
     moderator.register(EntryTitle, EntryModerator)
