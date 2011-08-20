@@ -89,7 +89,7 @@ def close_comments_date():
 def moderate_comments_date():
     return datetime.date.today() - datetime.timedelta(days=7)
 
-class EntryTitle(models.Model):
+class AbstractEntryTitle(models.Model):
     entry = models.ForeignKey(Entry, verbose_name=_('entry'))
     language = models.CharField(_('language'), max_length=15, choices=settings.LANGUAGES)
     title = models.CharField(_('title'), max_length=255)
@@ -115,6 +115,7 @@ class EntryTitle(models.Model):
         unique_together = ('language', 'slug')
         verbose_name = _('blogentry')
         verbose_name_plural = _('blogentries')
+        abstract = True
         
     def _pub_date(self):
         return self.entry.pub_date
@@ -131,13 +132,16 @@ class EntryTitle(models.Model):
             return True
         return False
     
-    def moderate_days(self):
+    def moderate_days(self): # not needed for now remove or leave as hook?
         pub_date = datetime.date(self.pub_date.year, self.pub_date.month, self.pub_date.day)
         return (pub_date - datetime.date.today()).days
             
-    def comments_under_moderation(self):
+    def comments_under_moderation(self): # not needed for now remove or leave as hook?
         return True
-        
+
+class EntryTitle(AbstractEntryTitle):
+    pass
+       
 class LatestEntriesPlugin(CMSPlugin):
     """
         Model for the settings when using the latest entries cms plugin
