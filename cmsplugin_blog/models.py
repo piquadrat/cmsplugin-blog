@@ -161,6 +161,7 @@ if 'django.contrib.comments' in settings.INSTALLED_APPS:
         close_after = 7
         
     def moderate(self, comment, content_object, request):
+        comment.is_public = False
         return True
         
     moderator.register(EntryTitle, EntryModerator)
