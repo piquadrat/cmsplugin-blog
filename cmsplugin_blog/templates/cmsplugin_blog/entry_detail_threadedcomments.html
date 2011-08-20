@@ -101,7 +101,7 @@
   {{ comment.comment|linebreaks }} 
   
   {% if not title.comments_closed %}
-  <p><a href="#" onclick="display_comment_form('comment-form-{{ comment.pk }}'); return false">{% trans "Reply" %}}</a></p>
+  <p><a href="#" onclick="display_comment_form('comment-form-{{ comment.pk }}'); return false">{% trans "Reply" %}</a></p>
   {% endif %}
   
 {% if not title.comments_closed %}
