@@ -169,6 +169,6 @@ if 'django.contrib.comments' in settings.INSTALLED_APPS:
 
     from django.contrib import comments
 
-    signals.pre_save.connect(comments.get_comment_model(), is_public_false) 
+    signals.pre_save.connect(comments.get_model(), is_public_false) 
 
     moderator.register(EntryTitle, EntryModerator)
