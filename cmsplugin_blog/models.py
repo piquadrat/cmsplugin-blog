@@ -84,8 +84,10 @@ class Entry(models.Model):
 tagging.register(Entry, tag_descriptor_attr='entry_tags')
 
 def close_comments_date():
-    """ Close comments after 7 days """
-    return datetime.date.today() + datetime.timedelta(days=7)
+    return datetime.date.today()
+
+def moderate_comments_date():
+    return datetime.date.today() - datetime.timedelta(days=7)
 
 class EntryTitle(models.Model):
     entry = models.ForeignKey(Entry, verbose_name=_('entry'))
@@ -97,10 +99,10 @@ class EntryTitle(models.Model):
     comments_enabled = models.BooleanField(_('enable comments'))
     close_comments_after = models.DateField(_('close comments after'),
         null=True, blank=True, default=close_comments_date,
-        help_text=_('Disallow/ delete comments after this date. Set empty to close immediately.'))
+        help_text=_('Disallow/ delete comments after this date. Set empty to close immediately, or current date to close after 7 days.'))
     moderate_comments_after = models.DateField(_('moderate comments after'),
-        null=True, blank=True, default=datetime.date.today,
-        help_text=_('Moderate comments after this date. Set empty to moderate immediately.'))
+        null=True, blank=True, default=moderate_comments_date,
+        help_text=_('Moderate comments after this date. Set empty to moderate immediately, or current date to moderate after 7 days.'))
     
     def __unicode__(self):
         return self.title
@@ -119,23 +121,17 @@ class EntryTitle(models.Model):
         unique_together = ('language', 'slug')
         verbose_name = _('blogentry')
         verbose_name_plural = _('blogentries')
-
+        
     def __close_comments_after(self):
         if self.close_comments_after is None:
-            self.entry.pub_date
-        if datetime.date.today() < self.close_comments_after:
-            return datetime.date.today()
-        else:
-            return self.close_comments_after
+            return self.entry.pub_date - datetime.timedelta(days=7)
+        return self.moderate_comments_after
     _close_comments_after = property(__close_comments_after)     
     
     def __moderate_comments_after(self):
         if self.moderate_comments_after is None:
-            return self.entry.pub_date
-        if datetime.date.today() < self.moderate_comments_after:
-            return datetime.date.today()
-        else:
-            return self.moderate_comments_after
+            return self.entry.pub_date - datetime.timedelta(days=7)
+        return self.moderate_comments_after
     _moderate_comments_after = property(__moderate_comments_after)     
 
     def comments_closed(self):
@@ -166,8 +162,8 @@ if 'django.contrib.comments' in settings.INSTALLED_APPS:
     class EntryModerator(CommentModerator):
         enable_field = 'comments_enabled'
         auto_close_field = '_close_comments_after'
-        close_after = 0
+        close_after = 7
         auto_moderate_field = '_moderate_comments_after'
-        moderale_after = 0
+        moderate_after = 7
         
     moderator.register(EntryTitle, EntryModerator)
