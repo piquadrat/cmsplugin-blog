@@ -133,8 +133,6 @@ class BaseEntryAdmin(M2MPlaceholderAdmin):
         if 'django.contrib.comments' in settings.INSTALLED_APPS:
             fieldsets.insert(1, (_('Comments'), {'fields': (
                 'comments_enabled',
-                'close_comments_after',
-                'moderate_comments_after' 
             )}))
         return fieldsets
         

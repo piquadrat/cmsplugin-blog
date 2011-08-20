@@ -96,14 +96,8 @@ class EntryTitle(models.Model):
     slug = models.SlugField(_('slug'), max_length=255)
     author = models.ForeignKey('auth.User', null=True, blank=True, verbose_name=_("author"))
     
-    comments_enabled = models.BooleanField(_('enable comments'))
-    close_comments_after = models.DateField(_('close comments after'),
-        null=True, blank=True, default=close_comments_date,
-        help_text=_('Disallow/ delete comments after this date. Set empty to close immediately, or current date to close after 7 days.'))
-    moderate_comments_after = models.DateField(_('moderate comments after'),
-        null=True, blank=True, default=moderate_comments_date,
-        help_text=_('Moderate comments after this date. Set empty to moderate immediately, or current date to moderate after 7 days.'))
-    
+    comments_enabled = models.BooleanField(_('enable comments'), help_text=_('Comments are allowed for 7 days, moderation is enabled by default.'))
+
     def __unicode__(self):
         return self.title
         
@@ -122,27 +116,21 @@ class EntryTitle(models.Model):
         verbose_name = _('blogentry')
         verbose_name_plural = _('blogentries')
         
-    def __close_comments_after(self):
-        if self.close_comments_after is None:
-            return self.entry.pub_date - datetime.timedelta(days=7)
-        return self.moderate_comments_after
-    _close_comments_after = property(__close_comments_after)     
+    def _pub_date(self):
+        return self.entry.pub_date
+    pub_date = property(_pub_date)
     
-    def __moderate_comments_after(self):
-        if self.moderate_comments_after is None:
-            return self.entry.pub_date - datetime.timedelta(days=7)
-        return self.moderate_comments_after
-    _moderate_comments_after = property(__moderate_comments_after)     
-
     def comments_closed(self):
         if not self.comments_enabled:
             return True
-        if self.close_comments_after and datetime.date.today() > self.close_comments_after:
+        pub_date = datetime.date(self.pub_date.year, self.pub_date.month, self.pub_date.day)
+        if (pub_date - datetime.date.today()).days >= 7:
             return True
         return False
     
     def comments_under_moderation(self):
-        if self.moderate_comments_after and datetime.date.today() > self.moderate_comments_after:
+        pub_date = datetime.date(self.pub_date.year, self.pub_date.month, self.pub_date.day)
+        if (pub_date - datetime.date.today()).days >= 0:
             return True
         return False
         
@@ -161,9 +149,9 @@ if 'django.contrib.comments' in settings.INSTALLED_APPS:
     
     class EntryModerator(CommentModerator):
         enable_field = 'comments_enabled'
-        auto_close_field = '_close_comments_after'
+        auto_close_field = 'pub_date'
         close_after = 7
-        auto_moderate_field = '_moderate_comments_after'
-        moderate_after = 7
+        auto_moderate_field = 'pub_date'
+        moderate_after = 0
         
     moderator.register(EntryTitle, EntryModerator)
