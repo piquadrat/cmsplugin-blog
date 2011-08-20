@@ -16,7 +16,12 @@
       {% render_placeholder two %}
   {% endwith %}
   
-  {% addtoblock "css" %}<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}fivethreeo/dlform.css">{% endaddtoblock %}
+  {% addtoblock "css" %}
+  <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}fivethreeo/dlform.css">
+  <style type="text/css">
+     .attention { color: red;}
+  </style>
+  {% endaddtoblock %}
   
   {% addtoblock "js" %}<script type="text/javascript" src="{% admin_media_prefix %}js/jquery.min.js"></script>{% endaddtoblock %}
   
@@ -31,8 +36,8 @@
   {% endaddtoblock %}
   
   <h2>{% trans "Comments" %}</h2>
-  {% if object.comments_enabled %}{% else %}
-     <p style="color: red">Comments are frozen. You cannot post new comments.</p>
+  {% if not object.comments_enabled %}
+     <p class="attention">Comments are frozen. You cannot post new comments.</p>
   {% endif %}  
  
   {% get_comment_list for title as comments_list %}
