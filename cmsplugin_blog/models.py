@@ -1,7 +1,8 @@
 import datetime
 
 from django.core.urlresolvers import reverse
-from django.db import models, signals
+from django.db import models
+from django.db.models import signals
 from django.db.models.query import QuerySet
 from django.conf import settings
 from django.utils.translation import get_language, ugettext_lazy as _
