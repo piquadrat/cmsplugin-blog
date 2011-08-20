@@ -136,9 +136,7 @@ class EntryTitle(models.Model):
         return (pub_date - datetime.date.today()).days
             
     def comments_under_moderation(self):
-        if self.pub_date < datetime.date.today() or self.moderate_days() >= 1:
-            return True
-        return False
+        return True
         
 class LatestEntriesPlugin(CMSPlugin):
     """
@@ -157,7 +155,8 @@ if 'django.contrib.comments' in settings.INSTALLED_APPS:
         enable_field = 'comments_enabled'
         auto_close_field = 'pub_date'
         close_after = 7
-        auto_moderate_field = 'pub_date'
-        moderate_after = 1
+        
+    def moderate(self, comment, content_object, request):
+        return True
         
     moderator.register(EntryTitle, EntryModerator)
