@@ -161,15 +161,6 @@ class EntryModerator(CommentModerator):
         
     def moderate(self, comment, content_object, request):
         return True
-    
-def is_public_false(self, instance, **kwargs):
-    if 'created' in kwargs and kwargs['created']:
-        instance.is_public = False
-    
+
 if getattr(settings, 'CMSPLUGIN_BLOG_MODERATE', False):
-
-    from django.contrib import comments
-
-    #signals.pre_save.connect(comments.get_model(), is_public_false) 
-
     moderator.register(EntryTitle, EntryModerator)
