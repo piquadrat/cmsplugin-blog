@@ -163,9 +163,10 @@ class EntryModerator(CommentModerator):
         return True
     
 def is_public_false(self, instance, **kwargs):
-    instance.is_public = False
+    if 'created' in kwargs and kwargs['created']:
+        instance.is_public = False
     
-if 'django.contrib.comments' in settings.INSTALLED_APPS:
+if getattr(settings, 'CMSPLUGIN_BLOG_MODERATE', False):
 
     from django.contrib import comments
 
