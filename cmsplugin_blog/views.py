@@ -4,11 +4,12 @@ from tagging.models import Tag, TaggedItem
 from tagging.utils import get_tag
 
 try: # pragma: no cover
-    from django.views.generic.dates import BaseDateDetailView, ArchiveIndexView, _date_lookup_for_field, _date_from_string, YearArchiveView, MonthArchiveView, WeekArchiveView, DayArchiveView
+    from django.views.generic.dates import BaseDateDetailView, ArchiveIndexView, _date_from_string, YearArchiveView, MonthArchiveView, WeekArchiveView, DayArchiveView
     from django.views.generic.detail import SingleObjectTemplateResponseMixin, DetailView
 except ImportError:  # pragma: no cover
+    raise
     from cbv.views.detail import SingleObjectTemplateResponseMixin, DetailView
-    from cbv.views.dates import BaseDateDetailView, ArchiveIndexView, YearArchiveView, MonthArchiveView, WeekArchiveView, DayArchiveView, _date_lookup_for_field, _date_from_string
+    from cbv.views.dates import BaseDateDetailView, ArchiveIndexView, YearArchiveView, MonthArchiveView, WeekArchiveView, DayArchiveView, _date_from_string
 
 from django.http import Http404
 from django.shortcuts import redirect
@@ -208,3 +209,24 @@ class BlogTaggedArchiveView(TaggedObjectList):
         if queryset:
             set_language_changer(self.request, queryset[0].language_changer)
         return queryset
+
+
+# copy from Django 1.4
+
+from django.db import models
+
+def _date_lookup_for_field(field, date):
+    """
+    Get the lookup kwargs for looking up a date against a given Field. If the
+    date field is a DateTimeField, we can't just do filter(df=date) because
+    that doesn't take the time into account. So we need to make a range lookup
+    in those cases.
+    """
+    if isinstance(field, models.DateTimeField):
+        date_range = (
+            datetime.datetime.combine(date, datetime.time.min),
+            datetime.datetime.combine(date, datetime.time.max)
+        )
+        return {'%s__range' % field.name: date_range}
+    else:
+        return {field.name: date}
